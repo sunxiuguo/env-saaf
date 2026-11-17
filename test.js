@@ -156,6 +156,22 @@ assert.ok(!ex.includes('sk_live'));
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// Issue #83: report a misplaced path and invalid schemas before reading files.
+{
+  const { loadEnv } = require('./index');
+  const message = "loadEnv expects a schema object as the first argument — did you mean loadEnv(schema, { path: '.env' })?";
+  const check = (error) => error instanceof TypeError && error.message === message;
+  assert.throws(() => loadEnv('.env', { PORT: { type: 'port' } }), check);
+  for (const invalid of [null, undefined, [], 42, true, Symbol('schema'), 1n, () => {}, new Date(), new Map()]) {
+    // A throwing options getter proves invalid input is rejected before any I/O.
+    assert.throws(() => loadEnv(invalid, { get path() { throw new Error('options accessed'); } }), check);
+  }
+  assert.deepStrictEqual(loadEnv({}, { paths: [], env: {} }), {});
+  const schema = Object.create(null);
+  schema.PORT = { type: 'port', default: 3000 };
+  assert.strictEqual(loadEnv(schema, { paths: [], env: {} }).PORT, 3000);
+}
+
 // feat: strict mode — flag variables that are set but not in the schema (fixes #4)
 {
   const schema = { PORT: { type: 'port', required: true } };
@@ -601,3 +617,4 @@ assert.deepStrictEqual(
 }
 
 console.log('env-saaf v1.2.0: all tests passed');
+
