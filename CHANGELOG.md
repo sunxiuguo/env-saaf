@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed: `loadEnv` rejects invalid first arguments with an actionable schema/path hint before reading files (fixes #83).
+
 - Added: `json` type — parse JSON values from env strings (objects, arrays, primitives); invalid JSON is rejected with an error naming the key, and a `default` may be given as an already-parsed object (fixes #32)
 - Added: `minLength`/`maxLength` options for string values — too-short or too-long values are rejected with an error naming the allowed length; either option works alone and they combine with `pattern` (fixes #48)
 
@@ -53,3 +55,4 @@
 - `required`, `default`, `choices`
 - All errors collected and reported together via `EnvSaafError`
 - Frozen result object, zero dependencies
+
