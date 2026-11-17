@@ -180,6 +180,10 @@ function validateEnv(schema, env = process.env, options = {}) {
  * (has a default or is not required).
  */
 function loadEnv(schema, options = {}) {
+  if (schema === null || typeof schema !== 'object' ||
+      (Object.getPrototypeOf(schema) !== Object.prototype && Object.getPrototypeOf(schema) !== null)) {
+    throw new TypeError("loadEnv expects a schema object as the first argument — did you mean loadEnv(schema, { path: '.env' })?");
+  }
   const { path: pathOpt = '.env', paths: pathsOpt, env = process.env, override = false, assign = false, ...rest } = options;
   // One file or several: `path` may be a string or an array of strings, or
   // pass `paths: [...]`. Files are read in order and LATER files win over
@@ -353,3 +357,4 @@ function generateExample(schema) {
 }
 
 module.exports = { validateEnv, loadEnv, EnvSaafError, parseEnvFile, scanCode, scanDir, diffEnv, maskValue, maskSecrets, generateExample };
+
