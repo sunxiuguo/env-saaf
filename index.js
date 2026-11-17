@@ -180,8 +180,12 @@ function validateEnv(schema, env = process.env, options = {}) {
  * (has a default or is not required).
  */
 function loadEnv(schema, options = {}) {
-  if (schema === null || typeof schema !== 'object' ||
-      (Object.getPrototypeOf(schema) !== Object.prototype && Object.getPrototypeOf(schema) !== null)) {
+  const prototype = schema !== null && typeof schema === 'object' ? Object.getPrototypeOf(schema) : undefined;
+  // Compare the native Object constructor across realms, not prototype identity.
+  const constructor = prototype && Object.prototype.hasOwnProperty.call(prototype, 'constructor')
+    ? prototype.constructor : undefined;
+  if (prototype !== null && (typeof constructor !== 'function' ||
+      Function.prototype.toString.call(constructor) !== Function.prototype.toString.call(Object))) {
     throw new TypeError("loadEnv expects a schema object as the first argument — did you mean loadEnv(schema, { path: '.env' })?");
   }
   const { path: pathOpt = '.env', paths: pathsOpt, env = process.env, override = false, assign = false, ...rest } = options;
